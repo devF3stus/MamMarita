@@ -20,11 +20,11 @@ window.MAMFLIX_CONTENT = {
   // - "off": Final release mode. Hides all "DEMO" badges, demo placeholders,
   //   and gracefully skips any missing video or empty wishes list.
   //   Set this to "off" right before you send the link to Mam.
-  demoMode: "auto",
+  demoMode: "off",
 
   // showDemoTags: Set to false to hide the small gold "DEMO" badges on sample
   // text while still keeping demo photo/video frames active.
-  showDemoTags: true,
+  showDemoTags: false,
 
   // passwordGate: Optional light privacy screen before the "Press to Begin" gate.
   // NOTE: Because GitHub Pages sites are public code, this is a polite privacy
@@ -130,16 +130,33 @@ window.MAMFLIX_CONTENT = {
 
     // DEMO: Replace with the real names of family and friends
     withLoveLabel: "With love from",
-    withLoveFrom: "[Your names here]",
+    withLoveFrom: "Family, Friends, and Church Members",
     withLoveIsDemo: true,
 
     // DEMO: Replace with your name
     directedByLabel: "Directed by",
-    directedBy: "[Your name here]",
+    directedBy: "Festus. O. & Jeff M.",
     directedByIsDemo: true,
 
     closingBlessing: "Happy Birthday, Mam.",
     closingSubline: "A beautiful life. A remarkable woman. A song that continues."
+  },
+
+  // Optional video background played behind the End Credits with Mam's own voice.
+  // Place the clip at assets/videos/credits/credits-bg.mp4 (recommended 30-60s, 720p MP4 H.264).
+  // If the file is missing, the credits fall back to the plain plum background automatically.
+  creditsVideo: {
+    file: "assets/videos/credits/credits-bg.mp4", // Video clip path (relative to site root)
+    poster: "",                                    // Optional still poster (.jpg) for reduced-motion
+    startTime: 0,                                  // Optional start time in seconds (default 0)
+    volume: 0.9,                                   // Video voice volume (0.0 to 1.0); ambient piano fades to silence
+    fit: "cover",                                  // "cover" (default: fills the whole screen with no bars)
+    focalPoint: "50% 50%",                         // Framing point ("left% top%", default exact centre; e.g. "50% 40%" to nudge)
+    zoom: 1,                                       // Optional zoom (1 to 1.3) around focalPoint to bring her closer (default 1)
+    overlayOpacity: 0.42,                          // Plum overlay strength over the video (0.0 to 1.0)
+    textPosition: "auto",                          // "auto" (lower third on phones), "bottom", "top", or "center"
+    grain: true,                                   // Subtle animated film grain over the credits video
+    grainOpacity: 0.05                             // Grain opacity (0.0 to 0.08 max)
   },
 
   /* ------------------------------------------------------------------------
@@ -197,8 +214,8 @@ window.MAMFLIX_CONTENT = {
     {
       // DEMO WISH 3: Drop assets/videos/wishes/wish-03-name.mp4 to replace automatically
       file: "assets/videos/wishes/wish-03-name.mp4",
-      name: "Friend Three",
-      relationship: "Dear Friend",
+      name: "Collins",
+      relationship: "Church family.",
       message: "Wishing you a birthday filled with the same joy you bring to everyone around you.",
       poster: "assets/videos/posters/wish-03-poster.jpg",
       focalPoint: "50% 30%",
@@ -760,9 +777,32 @@ window.MAMFLIX_CONTENT = {
         {
           // DEMO LETTER 9 — replace with real sender details and message
           isDemoText: true,
-          senderName: "Family & Friends",
-          relationship: "Birthday Blessing",
-          message: "Looking back across the journey, what shines brightest is your faithfulness — in family, in friendship, and in devotion to God. Happy, happy birthday, Mam!",
+          senderName: "ES",
+          relationship: "personal tribute",
+          message:
+           `We have seen you, Pst. Marita. We have seen the sacrifices, the countless hours of labour, and the immeasurable pouring out that goes into carrying the work of ministry. We have seen how you embody love, how you love so effortlessly, without having to try so hard. You have continued to show up for us, both as Capital Church and in our individual journeys.
+
+          Your accessibility is something we do not take for granted. Even after long services, when all you ought to be doing is resting, you still create room to minister to us personally. You have allowed us to experience your motherhood beyond the pulpit, extending your prayers, counsel, wisdom, and even practical support. What manner of love is this?
+
+        We see the burdens in your heart. Perhaps we do not yet possess the maturity to fully comprehend their magnitude, but as God continues to grow us, we find ourselves increasingly connected to the things that move your heart. Your burdens become our burdens, your convictions begin to shape ours, and the things you labour for become things we desire to see established in our generation. You nurture us in purpose, career, relationships, marriage, parenting, and virtually every dimension of life. You are not merely raising church members; you are nurturing sons and daughters into purpose.
+
+        The cosmos is fortunate to have you, but we consider ourselves exceedingly privileged to experience you at this proximity. Sometimes, we think of the twelve disciples and the extraordinary privilege of walking closely with Jesus during His earthly ministry. In our own little way, we cherish the privilege of walking closely with you, learning from you, and experiencing your motherhood beyond the public expression of ministry.
+
+        We cannot wait to behold what the future holds for you, the greater territories, the expanded assignments, and the generations yet to encounter the grace upon your life. And, of course, we shall find a way to smuggle ourselves into that future! We know there will always be room in your heart for us.
+
+        As we continue to grow, may we never outgrow our appreciation for the imprints you leave upon us. We want to look back years from now and still find your fingerprints all over our lives, our convictions, our families, and the people we become. Your prayers, counsel, sacrifices, and generosity are not lost on us.
+
+        And how you continue to make yourself available to minister to us, even in seasons when we ought to have insisted that you retreat and enjoy the beautiful privacy of motherhood with Will Jr., is truly remarkable. You have graciously allowed us to share in portions of your life, even those moments that ordinarily belong to your immediate family. We do not take this privilege lightly.
+
+        Mum, if we were to document everything we have witnessed and received through you, we would probably need several volumes of books. There are stories behind the stories and countless acts of love that words may never adequately capture. If only we could exercise Joshua's authority and command the sun to stand still, perhaps we would have more time to pour out everything in our hearts!
+
+        But for now, we shall say this: WE LOVE YOU, MUM.
+
+        Thank you for being you, for continually yielding to God's purposes, and for making room for our becoming. Capital Church loves you, and your sons and daughters celebrate you.
+
+        And to Dad, Apostle William Mbae, thank you for choosing her, standing with her, and allowing us the extraordinary privilege of calling her our mum.
+
+        Happy birthday, Mum. We celebrate the woman, the mother, the minister, and the vessel. We are profoundly grateful that God's providence brought us within the reach of your motherhood.`,
           senderPhoto: "assets/photos/letters/friend-09.jpg",
           senderFocalPoint: "50% 30%",
           backgroundPhoto: "assets/photos/letters/friend-09.jpg",

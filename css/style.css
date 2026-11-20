@@ -1958,6 +1958,221 @@ body.film-paused .worship-wave span {
 }
 
 /* --------------------------------------------------------------------------
+   18B. END CREDITS VIDEO BACKGROUND & TIMED LINES
+   -------------------------------------------------------------------------- */
+.credits-overlay.has-credits-video {
+  height: 100vh;
+  height: 100dvh;
+  min-height: -webkit-fill-available;
+  padding: 0;
+  overflow: hidden;
+  background: var(--plum-deepest);
+}
+
+.credits-bg-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.credits-video-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.5s ease;
+}
+
+.credits-video-stage.is-video-ready {
+  opacity: 1;
+}
+
+.credits-video-stage .credits-video-el {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  display: block;
+}
+
+.credits-plum-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: rgba(24, 9, 31, var(--credits-overlay-opacity, 0.42));
+}
+
+.credits-text-gradient {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgba(18, 6, 24, 0.62) 0%,
+    rgba(18, 6, 24, 0.28) 28%,
+    transparent 52%
+  );
+}
+
+.credits-text-gradient.pos-top {
+  background: linear-gradient(
+    to bottom,
+    rgba(18, 6, 24, 0.62) 0%,
+    rgba(18, 6, 24, 0.28) 28%,
+    transparent 52%
+  );
+}
+
+.credits-text-gradient.pos-center {
+  background: radial-gradient(ellipse at center, rgba(18, 6, 24, 0.5) 0%, transparent 65%);
+}
+
+.credits-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background: radial-gradient(circle at center, transparent 48%, rgba(10, 4, 14, 0.48) 100%);
+}
+
+.credits-grain {
+  position: absolute;
+  inset: -12%;
+  z-index: 5;
+  pointer-events: none;
+  opacity: var(--credits-grain-opacity, 0.05);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+  will-change: transform;
+  animation: creditsGrainShift 0.9s steps(7) infinite;
+}
+
+@supports (mix-blend-mode: overlay) {
+  .credits-grain {
+    mix-blend-mode: overlay;
+  }
+}
+
+.credits-grain.is-grain-off {
+  display: none;
+}
+
+@keyframes creditsGrainShift {
+  0%   { transform: translate3d(0, 0, 0); }
+  15%  { transform: translate3d(-3%, 2%, 0); }
+  30%  { transform: translate3d(2%, -3%, 0); }
+  45%  { transform: translate3d(-2%, -2%, 0); }
+  60%  { transform: translate3d(3%, 3%, 0); }
+  75%  { transform: translate3d(-1%, 3%, 0); }
+  90%  { transform: translate3d(2%, -1%, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+.credits-ending-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  background: rgba(8, 3, 11, 0.94);
+  opacity: 0;
+  transition: opacity 2s ease;
+}
+
+.credits-ending-scrim.is-active {
+  opacity: 1;
+}
+
+.credits-sequence-wrap {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: calc(env(safe-area-inset-top, 0px) + 3.4rem) 1.5rem calc(env(safe-area-inset-bottom, 0px) + 4.4rem);
+  pointer-events: none;
+}
+
+.credits-sequence-wrap.pos-top {
+  justify-content: flex-start;
+}
+
+.credits-sequence-wrap.pos-center,
+.credits-sequence-wrap.is-finale {
+  justify-content: center;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 2rem);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 2rem);
+}
+
+.credits-line-stage {
+  max-width: min(92%, 580px);
+  text-align: center;
+  opacity: 0;
+  transform: translate3d(0, 8px, 0);
+  transition: opacity 1s ease, transform 1s var(--ease-cinematic);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}
+
+.credits-line-stage.is-shown {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.credits-line-stage .credit-label,
+.credits-line-stage .credit-value,
+.credits-line-stage .eyebrow-gold {
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+}
+
+.credits-finale-wrap {
+  max-width: 580px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  text-align: center;
+  opacity: 0;
+  transform: translate3d(0, 10px, 0);
+  transition: opacity 1.2s ease, transform 1.2s var(--ease-cinematic);
+  pointer-events: none;
+}
+
+.credits-finale-wrap.is-shown {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.credits-finale-wrap .credits-actions {
+  pointer-events: auto;
+}
+
+.credits-finale-wrap .btn {
+  min-width: 44px;
+  min-height: 44px;
+  touch-action: manipulation;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .credits-grain {
+    display: none !important;
+    animation: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
    19. AUTO-HIDING PLAYER CONTROLS CHROME
    -------------------------------------------------------------------------- */
 .player-chrome {

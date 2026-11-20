@@ -331,15 +331,15 @@
     frame.className = "demo-frame " + kbClass;
     frame.style.setProperty("--kb-dur", kbDuration + "s");
 
-    const outline = document.createElement("div");
-    outline.className = "demo-frame-outline";
-
-    const monogram = document.createElement("span");
-    monogram.className = "demo-frame-monogram";
-    monogram.textContent = "M";
-    outline.appendChild(monogram);
-
     if (isDemoAuto()) {
+      const outline = document.createElement("div");
+      outline.className = "demo-frame-outline";
+
+      const monogram = document.createElement("span");
+      monogram.className = "demo-frame-monogram";
+      monogram.textContent = "M";
+      outline.appendChild(monogram);
+
       const label = document.createElement("span");
       label.className = "demo-frame-label";
       label.textContent = prefix + " · replace with " + fileName;
@@ -349,9 +349,10 @@
       sub.className = "demo-frame-sub";
       sub.textContent = "Drop " + fileName + " into " + folderHint + " to play automatically";
       outline.appendChild(sub);
+
+      frame.appendChild(outline);
     }
 
-    frame.appendChild(outline);
     container.appendChild(frame);
   }
 
@@ -758,6 +759,10 @@
       this.fadePianoTo(this.cfg.pianoDuckedVolume, durationMs || 1400);
     }
 
+    silencePiano(durationMs) {
+      this.fadePianoTo(0, durationMs || 1500);
+    }
+
     restorePiano(durationMs) {
       this.fadePianoTo(this.cfg.pianoNormalVolume, durationMs || 1600);
     }
@@ -1035,6 +1040,24 @@
     subtitleDemoBadge: document.getElementById("subtitle-demo-badge"),
 
     creditsOverlay: document.getElementById("credits-overlay"),
+    creditsBgLayer: document.getElementById("credits-bg-layer"),
+    creditsVideoStage: document.getElementById("credits-video-stage"),
+    creditsPlumOverlay: document.getElementById("credits-plum-overlay"),
+    creditsTextGradient: document.getElementById("credits-text-gradient"),
+    creditsGrain: document.getElementById("credits-grain"),
+    creditsEndingScrim: document.getElementById("credits-ending-scrim"),
+    creditsSequenceWrap: document.getElementById("credits-sequence-wrap"),
+    creditsLineStage: document.getElementById("credits-line-stage"),
+    creditsSeqEyebrow: document.getElementById("credits-seq-eyebrow"),
+    creditsSeqLabel: document.getElementById("credits-seq-label"),
+    creditsSeqValue: document.getElementById("credits-seq-value"),
+    creditsFinaleWrap: document.getElementById("credits-finale-wrap"),
+    creditsFinaleBlessing: document.getElementById("credits-finale-blessing"),
+    creditsFinaleSubline: document.getElementById("credits-finale-subline"),
+    btnReplayFilmSeq: document.getElementById("btn-replay-film-seq"),
+    btnCreditsLettersSeq: document.getElementById("btn-credits-letters-seq"),
+    btnCreditsHomeSeq: document.getElementById("btn-credits-home-seq"),
+    creditsFallbackWrap: document.getElementById("credits-fallback-wrap"),
     creditLeadLabel: document.getElementById("credit-lead-label"),
     creditLeadName: document.getElementById("credit-lead-name"),
     creditLoveLabel: document.getElementById("credit-love-label"),
@@ -1696,6 +1719,452 @@
     }
   }
 
+  /* ------------------------------------------------------------------------
+     CREDITS VIDEO BACKGROUND & TIMED FADING CREDIT LINES
+     ------------------------------------------------------------------------ */
+  const creditsState = {
+    preloadAttempted: false,
+    preloadVideo: null,
+    preloadReady: false,
+    preloadFailed: false,
+    isRunning: false,
+    hasEnded: false,
+    video: null,
+    hasLiveVideo: false,
+    elapsedSec: 0,
+    timeline: [],       // [{ start, end, eyebrow, label, value }]
+    activeScreenIdx: -1,
+    finaleAtSec: 0,
+    pianoSilenced: false,
+    videoEnded: false
+  };
+
+  function prefersReducedMotion() {
+    return typeof window !== "undefined" && window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
+
+  function preloadCreditsVideoOnce() {
+    try {
+      const cv = CONTENT.creditsVideo || {};
+      if (!cv.file || creditsState.preloadAttempted || prefersReducedMotion()) return;
+      creditsState.preloadAttempted = true;
+
+      const v = document.createElement("video");
+      v.preload = "auto";
+      v.playsInline = true;
+      v.setAttribute("playsinline", "");
+      v.setAttribute("webkit-playsinline", "");
+      v.muted = true; // Muted during silent preload; unmuted to cv.volume when credits begin
+      v.src = cv.file;
+
+      v.addEventListener("loadeddata", function () {
+        creditsState.preloadReady = true;
+      }, { once: true });
+      v.addEventListener("error", function () {
+        creditsState.preloadFailed = true;
+      }, { once: true });
+
+      v.load();
+      creditsState.preloadVideo = v;
+    } catch (e) {}
+  }
+
+  function buildCreditsLineScreens() {
+    const cr = CONTENT.credits || {};
+    const screens = [];
+    screens.push({ eyebrow: "A MAMFLIX ORIGINAL", label: "", value: "" });
+    screens.push({
+      eyebrow: "",
+      label: cr.leadLabel || "Starring",
+      value: cr.leadName || "Mam · Pastor Marita Mbae"
+    });
+
+    const rawLove = (cr.withLoveFrom || "").trim();
+    if (rawLove) {
+      const names = rawLove.split(/\s*[,;]\s*/).filter(Boolean);
+      const groupSize = names.length >= 6 ? 4 : 3;
+      if (names.length <= 4) {
+        screens.push({
+          eyebrow: "",
+          label: cr.withLoveLabel || "With love from",
+          value: rawLove
+        });
+      } else {
+        for (let i = 0; i < names.length; i += groupSize) {
+          screens.push({
+            eyebrow: "",
+            label: cr.withLoveLabel || "With love from",
+            value: names.slice(i, i + groupSize).join(", ")
+          });
+        }
+      }
+    }
+
+    if (cr.directedBy) {
+      screens.push({
+        eyebrow: "",
+        label: cr.directedByLabel || "Directed by",
+        value: cr.directedBy
+      });
+    }
+    return screens;
+  }
+
+  // Fallback timeline: 4s per screen (1s fade in, 2s hold, 1s fade out), starting at 2.0s
+  function computeFallbackCreditsTimeline() {
+    const screens = buildCreditsLineScreens();
+    const leadIn = 2.0;
+    const slot = 4.0;
+    const items = screens.map(function (scr, idx) {
+      const start = leadIn + idx * slot;
+      return {
+        start: start,
+        end: start + slot,
+        eyebrow: scr.eyebrow,
+        label: scr.label,
+        value: scr.value
+      };
+    });
+    const lastEnd = items.length ? items[items.length - 1].end : 4.0;
+    return { items: items, finaleAtSec: lastEnd + 1.0 };
+  }
+
+  function computeCreditsTimeline(videoDurationSec) {
+    if (!videoDurationSec || !isFinite(videoDurationSec) || videoDurationSec <= 0) {
+      return computeFallbackCreditsTimeline();
+    }
+    const screens = buildCreditsLineScreens();
+    const count = screens.length;
+    if (count === 0) return { items: [], finaleAtSec: Math.max(4, videoDurationSec) };
+
+    const leadIn = 2.0;
+    const tailOut = 3.0;
+    const minSlot = 4.5; // 1s fade-in + 2.5s min hold + 1s fade-out
+    const available = Math.max(0, videoDurationSec - leadIn - tailOut);
+    const slot = Math.max(minSlot, available / count);
+    const items = screens.map(function (scr, idx) {
+      const start = leadIn + idx * slot;
+      const end = start + slot;
+      return {
+        start: start,
+        end: end,
+        eyebrow: scr.eyebrow,
+        label: scr.label,
+        value: scr.value
+      };
+    });
+    const lastEnd = items[items.length - 1].end;
+    const finaleAtSec = Math.max(videoDurationSec, lastEnd + 1.0);
+    return { items: items, finaleAtSec: finaleAtSec };
+  }
+
+  // Credits video always fills the whole screen (object-fit: cover, focalPoint, optional zoom 1..1.3)
+  function applyCreditsVideoSmartFit() {
+    try {
+      if (!creditsState.video) return;
+      const cv = CONTENT.creditsVideo || {};
+      const fp = (cv.focalPoint || "50% 50%").trim();
+      const rawZoom = typeof cv.zoom === "number" && isFinite(cv.zoom) ? cv.zoom : 1;
+      const zoom = Math.max(1, Math.min(1.3, rawZoom));
+      creditsState.video.style.objectFit = "cover";
+      creditsState.video.style.objectPosition = fp;
+      creditsState.video.style.transformOrigin = fp;
+      creditsState.video.style.transform = zoom > 1 ? ("scale(" + zoom.toFixed(3) + ")") : "";
+    } catch (e) {}
+  }
+
+  function cleanupCreditsSequence(restoreAudio) {
+    try {
+      const wasSilenced = creditsState.pianoSilenced;
+      creditsState.isRunning = false;
+      creditsState.hasEnded = false;
+      creditsState.elapsedSec = 0;
+      creditsState.timeline = [];
+      creditsState.activeScreenIdx = -1;
+      creditsState.pianoSilenced = false;
+      creditsState.videoEnded = false;
+      creditsState.hasLiveVideo = false;
+
+      if (creditsState.video) {
+        try {
+          creditsState.video.pause();
+          creditsState.video.removeAttribute("src");
+          creditsState.video.load();
+        } catch (e) {}
+        creditsState.video = null;
+      }
+
+      if (dom.creditsOverlay) dom.creditsOverlay.classList.remove("has-credits-video");
+      if (dom.creditsBgLayer) dom.creditsBgLayer.classList.add("is-hidden");
+      if (dom.creditsVideoStage) {
+        dom.creditsVideoStage.classList.remove("is-video-ready");
+        dom.creditsVideoStage.innerHTML = "";
+      }
+      if (dom.creditsEndingScrim) dom.creditsEndingScrim.classList.remove("is-active");
+      if (dom.creditsSequenceWrap) {
+        dom.creditsSequenceWrap.classList.add("is-hidden");
+        dom.creditsSequenceWrap.classList.remove("is-finale", "pos-top", "pos-center", "pos-bottom");
+      }
+      if (dom.creditsLineStage) dom.creditsLineStage.classList.remove("is-shown");
+      if (dom.creditsFinaleWrap) {
+        dom.creditsFinaleWrap.classList.add("is-hidden");
+        dom.creditsFinaleWrap.classList.remove("is-shown");
+      }
+      if (dom.creditsFallbackWrap) dom.creditsFallbackWrap.classList.remove("is-hidden");
+
+      if (restoreAudio && wasSilenced) {
+        audioDirector.restorePiano(1600);
+      }
+    } catch (e) {}
+  }
+
+  function finishCreditsSequence() {
+    try {
+      if (creditsState.hasEnded) return;
+      creditsState.hasEnded = true;
+      if (dom.creditsLineStage) dom.creditsLineStage.classList.remove("is-shown");
+      if (dom.creditsEndingScrim) dom.creditsEndingScrim.classList.add("is-active");
+      if (dom.creditsSequenceWrap) dom.creditsSequenceWrap.classList.add("is-finale");
+
+      if (creditsState.pianoSilenced) {
+        audioDirector.restorePiano(2000);
+        creditsState.pianoSilenced = false;
+      }
+
+      if (dom.creditsFinaleWrap) {
+        dom.creditsFinaleWrap.classList.remove("is-hidden");
+        requestAnimationFrame(function () {
+          if (dom.creditsFinaleWrap) dom.creditsFinaleWrap.classList.add("is-shown");
+        });
+      }
+    } catch (e) {}
+  }
+
+  function updateCreditsSequence(deltaSec) {
+    try {
+      if (!creditsState.isRunning || creditsState.hasEnded) return;
+      creditsState.elapsedSec += deltaSec;
+      const t = creditsState.elapsedSec;
+
+      let foundIdx = -1;
+      for (let i = 0; i < creditsState.timeline.length; i++) {
+        const item = creditsState.timeline[i];
+        if (t >= item.start && t < item.end - 1.0) {
+          foundIdx = i;
+          break;
+        }
+      }
+
+      if (foundIdx !== creditsState.activeScreenIdx) {
+        creditsState.activeScreenIdx = foundIdx;
+        if (foundIdx === -1) {
+          if (dom.creditsLineStage) dom.creditsLineStage.classList.remove("is-shown");
+        } else {
+          const scr = creditsState.timeline[foundIdx];
+          if (dom.creditsSeqEyebrow) {
+            dom.creditsSeqEyebrow.textContent = scr.eyebrow || "";
+            dom.creditsSeqEyebrow.classList.toggle("is-hidden", !scr.eyebrow);
+          }
+          if (dom.creditsSeqLabel) {
+            dom.creditsSeqLabel.textContent = scr.label || "";
+            dom.creditsSeqLabel.classList.toggle("is-hidden", !scr.label);
+          }
+          if (dom.creditsSeqValue) {
+            dom.creditsSeqValue.textContent = scr.value || "";
+            dom.creditsSeqValue.classList.toggle("is-hidden", !scr.value);
+          }
+          if (dom.creditsLineStage) {
+            requestAnimationFrame(function () {
+              if (dom.creditsLineStage) dom.creditsLineStage.classList.add("is-shown");
+            });
+          }
+        }
+      }
+
+      const linesDone = t >= creditsState.finaleAtSec;
+      // If video ended, wait for lines; if lines finished and video never became live within 3s, finish cleanly
+      if (linesDone && (creditsState.videoEnded || !creditsState.hasLiveVideo)) {
+        finishCreditsSequence();
+      }
+    } catch (e) {}
+  }
+
+  function startCreditsSequence(seg, segIndex) {
+    try {
+      cleanupCreditsSequence(false);
+      const cv = CONTENT.creditsVideo || {};
+      const cr = CONTENT.credits || {};
+      if (dom.creditsFinaleBlessing) {
+        dom.creditsFinaleBlessing.textContent = cr.closingBlessing || "Happy Birthday, Mam.";
+      }
+      if (dom.creditsFinaleSubline) {
+        dom.creditsFinaleSubline.textContent = cr.closingSubline || CONTENT.tagline || "";
+      }
+
+      if (!cv.file || creditsState.preloadFailed) {
+        dom.creditsOverlay.classList.remove("is-hidden");
+        wakePlayerChrome();
+        return;
+      }
+
+      if (prefersReducedMotion()) {
+        if (cv.poster && dom.creditsVideoStage && dom.creditsBgLayer) {
+          dom.creditsOverlay.classList.add("has-credits-video");
+          dom.creditsBgLayer.classList.remove("is-hidden");
+          if (dom.creditsGrain) dom.creditsGrain.classList.add("is-grain-off");
+          const ovOp = typeof cv.overlayOpacity === "number" ? Math.max(0, Math.min(1, cv.overlayOpacity)) : 0.42;
+          if (dom.creditsPlumOverlay) dom.creditsPlumOverlay.style.setProperty("--credits-overlay-opacity", String(ovOp));
+          const posterImg = document.createElement("img");
+          posterImg.className = "credits-video-el";
+          posterImg.alt = "";
+          posterImg.src = cv.poster;
+          posterImg.style.objectPosition = cv.focalPoint || "50% 50%";
+          posterImg.addEventListener("load", function () {
+            dom.creditsVideoStage.classList.add("is-video-ready");
+          }, { once: true });
+          posterImg.addEventListener("error", function () {
+            cleanupCreditsSequence(false);
+          }, { once: true });
+          dom.creditsVideoStage.appendChild(posterImg);
+        }
+        dom.creditsOverlay.classList.remove("is-hidden");
+        wakePlayerChrome();
+        return;
+      }
+
+      const ovOp = typeof cv.overlayOpacity === "number" ? Math.max(0, Math.min(1, cv.overlayOpacity)) : 0.42;
+      const grOp = typeof cv.grainOpacity === "number" ? Math.max(0, Math.min(0.08, cv.grainOpacity)) : 0.05;
+      const pos = (cv.textPosition || "auto").toLowerCase();
+      const posClass = pos === "top" ? "pos-top" : (pos === "center" ? "pos-center" : "pos-bottom");
+
+      if (dom.creditsPlumOverlay) dom.creditsPlumOverlay.style.setProperty("--credits-overlay-opacity", String(ovOp));
+      if (dom.creditsTextGradient) {
+        dom.creditsTextGradient.classList.remove("pos-top", "pos-center", "pos-bottom");
+        dom.creditsTextGradient.classList.add(posClass);
+      }
+      if (dom.creditsGrain) {
+        dom.creditsGrain.style.setProperty("--credits-grain-opacity", String(grOp));
+        dom.creditsGrain.classList.toggle("is-grain-off", cv.grain === false);
+      }
+      if (dom.creditsSequenceWrap) {
+        dom.creditsSequenceWrap.classList.remove("is-hidden", "is-finale", "pos-top", "pos-center", "pos-bottom");
+        dom.creditsSequenceWrap.classList.add(posClass);
+      }
+      if (dom.creditsFallbackWrap) dom.creditsFallbackWrap.classList.add("is-hidden");
+      if (dom.creditsBgLayer) dom.creditsBgLayer.classList.remove("is-hidden");
+      dom.creditsOverlay.classList.add("has-credits-video");
+      dom.creditsOverlay.classList.remove("is-hidden");
+
+      // Start fallback 4s/screen timeline immediately so credit lines NEVER wait on video events
+      const fallbackTl = computeFallbackCreditsTimeline();
+      creditsState.timeline = fallbackTl.items;
+      creditsState.finaleAtSec = fallbackTl.finaleAtSec;
+      creditsState.isRunning = true;
+      creditsState.elapsedSec = 0;
+
+      // Reuse preloaded video element if available (avoids re-downloading)
+      let video = null;
+      if (creditsState.preloadVideo && !creditsState.preloadFailed) {
+        video = creditsState.preloadVideo;
+        creditsState.preloadVideo = null;
+        creditsState.preloadAttempted = false;
+      } else {
+        video = document.createElement("video");
+        video.preload = "auto";
+        video.playsInline = true;
+        video.setAttribute("playsinline", "");
+        video.setAttribute("webkit-playsinline", "");
+        video.src = cv.file;
+      }
+
+      video.className = "credits-video-el";
+      video.controls = false;
+      video.loop = false;
+      video.poster = cv.poster || "";
+      video.muted = audioDirector.isMuted;
+      video.volume = typeof cv.volume === "number" ? Math.max(0, Math.min(1, cv.volume)) : 0.9;
+
+      dom.creditsVideoStage.innerHTML = "";
+      dom.creditsVideoStage.appendChild(video);
+      creditsState.video = video;
+      applyCreditsVideoSmartFit();
+
+      const startTime = typeof cv.startTime === "number" && cv.startTime > 0 ? cv.startTime : 0;
+
+      const onMetadataReady = function () {
+        try {
+          if (!creditsState.isRunning || creditsState.video !== video) return;
+          applyCreditsVideoSmartFit();
+          if (startTime > 0 && startTime < (video.duration || Infinity)) {
+            try { video.currentTime = startTime; } catch (e) {}
+          }
+          if (video.duration && isFinite(video.duration) && video.duration > 0) {
+            const remainingDur = Math.max(6, video.duration - startTime);
+            if (playerState.segments[segIndex]) {
+              playerState.segments[segIndex].durationSec = remainingDur;
+            }
+            // Only rescale timeline if video metadata arrived within the first 3 seconds
+            if (creditsState.elapsedSec < 3.0) {
+              const tl = computeCreditsTimeline(remainingDur);
+              creditsState.timeline = tl.items;
+              creditsState.finaleAtSec = tl.finaleAtSec;
+            }
+          }
+        } catch (e) {}
+      };
+
+      const revealAndPlay = function () {
+        try {
+          if (!creditsState.isRunning || creditsState.video !== video) return;
+          creditsState.hasLiveVideo = true;
+          dom.creditsVideoStage.classList.add("is-video-ready");
+          if (!creditsState.pianoSilenced) {
+            audioDirector.silencePiano(1500);
+            creditsState.pianoSilenced = true;
+          }
+          if (!playerState.isPaused) {
+            video.play().catch(function () {
+              video.muted = true;
+              video.play().catch(function () {});
+            });
+          }
+        } catch (e) {}
+      };
+
+      video.addEventListener("loadedmetadata", onMetadataReady);
+      video.addEventListener("canplay", revealAndPlay, { once: true });
+      video.addEventListener("ended", function () {
+        if (!creditsState.isRunning || creditsState.video !== video) return;
+        creditsState.videoEnded = true;
+        if (creditsState.elapsedSec >= creditsState.finaleAtSec) {
+          finishCreditsSequence();
+        }
+      });
+      video.addEventListener("error", function () {
+        if (creditsState.video !== video) return;
+        // Keep credits lines running on plum background if video fails
+        creditsState.hasLiveVideo = false;
+        if (dom.creditsVideoStage) dom.creditsVideoStage.classList.remove("is-video-ready");
+      });
+
+      if (video.readyState >= 1) {
+        onMetadataReady();
+      }
+      if (video.readyState >= 3) {
+        revealAndPlay();
+      } else if (!video.currentSrc) {
+        try { video.load(); } catch (e) {}
+      }
+
+      wakePlayerChrome();
+    } catch (e) {
+      cleanupCreditsSequence(true);
+      if (dom.creditsOverlay) dom.creditsOverlay.classList.remove("is-hidden");
+      wakePlayerChrome();
+    }
+  }
+
   function buildFilmSegments() {
     const segments = [];
     const activeChapters = getActiveChapters();
@@ -2012,6 +2481,7 @@
     dom.timelineOverlay.classList.add("is-hidden");
     dom.lettersOverlay.classList.add("is-hidden");
     hideCaptionCard();
+    cleanupCreditsSequence(true);
     dom.creditsOverlay.classList.add("is-hidden");
   }
 
@@ -2511,6 +2981,9 @@
       // Reset expanded state and unhide card on each new letter
       setLetterExpanded(false);
 
+      // Quietly preload credits background video while Chapter 7 letters play
+      preloadCreditsVideoOnce();
+
       // Show a tiny tap-to-hide hint the first time only
       showTapHintOnce();
 
@@ -2618,8 +3091,7 @@
     /* --- CASE 5: END CREDITS --- */
     if (seg.kind === "credits") {
       dom.worshipStatusCard.classList.add("is-hidden");
-      dom.creditsOverlay.classList.remove("is-hidden");
-      wakePlayerChrome();
+      startCreditsSequence(seg, index);
     }
   }
 
@@ -2643,6 +3115,10 @@
         const holdLetterForReadMore = seg.kind === "letter" && playerState.isLetterExpanded;
         if (!holdLetterForReadMore) {
           playerState.segmentElapsedSec += deltaSec;
+        }
+
+        if (seg.kind === "credits" && creditsState.isRunning) {
+          updateCreditsSequence(deltaSec);
         }
 
         const totalElapsed = seg.startTimeSec + Math.min(seg.durationSec, playerState.segmentElapsedSec);
@@ -2705,6 +3181,7 @@
     playerState.isActive = false;
     if (playerState.rafId) cancelAnimationFrame(playerState.rafId);
     cleanupActiveStageVideo(false);
+    cleanupCreditsSequence(false);
     audioDirector.stopChapterTwoWorship(true);
     setPlayerPaused(false);
 
@@ -2724,6 +3201,16 @@
           playerState.activeStageVideo.pause();
         } else {
           playerState.activeStageVideo.play().catch(function () {});
+        }
+      } catch (e) {}
+    }
+
+    if (creditsState.video && creditsState.isRunning && !creditsState.videoEnded) {
+      try {
+        if (paused) {
+          creditsState.video.pause();
+        } else {
+          creditsState.video.play().catch(function () {});
         }
       } catch (e) {}
     }
@@ -2848,6 +3335,9 @@
 
     if (playerState.activeStageVideo) {
       playerState.activeStageVideo.muted = isMuted;
+    }
+    if (creditsState.video) {
+      creditsState.video.muted = isMuted;
     }
     if (lightboxState.activeVideo) {
       lightboxState.activeVideo.muted = isMuted;
@@ -2989,6 +3479,39 @@
     dom.btnCreditsHome.addEventListener("click", function (e) {
       e.stopPropagation();
       returnToHomepage();
+    });
+
+    if (dom.btnReplayFilmSeq) {
+      dom.btnReplayFilmSeq.addEventListener("click", function (e) {
+        e.stopPropagation();
+        startFullFilm();
+      });
+    }
+    if (dom.btnCreditsLettersSeq) {
+      dom.btnCreditsLettersSeq.addEventListener("click", function (e) {
+        e.stopPropagation();
+        jumpToLetterIndex(0);
+      });
+    }
+    if (dom.btnCreditsHomeSeq) {
+      dom.btnCreditsHomeSeq.addEventListener("click", function (e) {
+        e.stopPropagation();
+        returnToHomepage();
+      });
+    }
+    if (dom.creditsOverlay) {
+      dom.creditsOverlay.addEventListener("click", function (e) {
+        if (e.target.closest("button, a, .credits-actions")) return;
+        if (!dom.playerChrome) return;
+        if (dom.playerChrome.classList.contains("is-idle")) {
+          wakePlayerChrome();
+        } else {
+          dom.playerChrome.classList.add("is-idle");
+        }
+      });
+    }
+    ["resize", "orientationchange"].forEach(function (evt) {
+      window.addEventListener(evt, applyCreditsVideoSmartFit, { passive: true });
     });
 
     // Wake player controls on mouse move or touch

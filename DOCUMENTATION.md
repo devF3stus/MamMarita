@@ -217,3 +217,39 @@ Go through this checklist right before you share the link with Mam:
 - [ ] **All real photos are in `assets/photos/`** (including `hero.jpg` and Chapter 4 photos `ch4-01.jpg`–`ch4-04.jpg`), exported from original photos at ~`2400px` (`2560px` hero).
 - [ ] **Licensed / royalty-free real piano** placed at `assets/audio/piano.mp3` (alongside `assets/audio/mam-singing.mp3`).
 - [ ] **Total project folder size checked** (each video under 15 MB, total repository well under 1 GB).
+- [ ] **Credits checked on a real iPhone and Android phone with sound on** — verify readability on bright and dark moments, and confirm no credit text covers her face.
+
+---
+
+## 10. Final deployment check
+- `demoMode` is now `"off"` (and `showDemoTags` is `false`) in `js/content.js`, so no visible `DEMO` badges, demo frames, or file-replacement instructions will appear to visitors.
+- Before sharing the link, replace the remaining placeholder content items in `js/content.js` (including the sample `description`, Chapter 1–5 `epigraph`/`subtitles`/`quote`/`timeline` text, `Community Member One` quote attribution, and any sample `letters` or `wishes` entries you have not yet personalized).
+
+---
+
+## 11. Credits video background
+
+- **Where to put the clip:** Save your MP4 at `assets/videos/credits/credits-bg.mp4`.
+- **Recommended specs:** **30 to 60 seconds**, **720p MP4 (H.264)**, compressed to about **5 to 8 MB** (the credits sequence automatically lasts as long as the video clip).
+- **Footage & permissions:** Choose calm footage with clear audio and minimal background noise, since Mam's voice from the clip plays throughout the credits. Always get permission from anyone appearing in the clip.
+- **Fallbacks:** If `credits-bg.mp4` is missing, the credits automatically use the plain plum background and existing piano timing with no errors. On devices with **Reduce Motion** enabled, the optional `poster` image (or plain plum) is shown as a still background without video playback.
+
+### Customizing `creditsVideo` in `js/content.js`
+```js
+creditsVideo: {
+  file: "assets/videos/credits/credits-bg.mp4",
+  poster: "assets/videos/posters/credits-poster.jpg",
+  volume: 0.9,           // Voice volume (0.0 to 1.0)
+  overlayOpacity: 0.42,  // Plum tint strength (higher = darker)
+  textPosition: "auto",  // "auto" (lower third), "bottom", "top", or "center"
+  grain: true,           // Subtle film grain (false to turn off)
+  grainOpacity: 0.05     // Grain strength (0.0 to 0.08 max)
+}
+```
+
+### Credits Troubleshooting
+- **"Credits video is too dark/bright":** Lower or raise `overlayOpacity` in `js/content.js` (for example `0.30` for brighter video, `0.55` for darker).
+- **"I can't read the credits":** Raise `overlayOpacity` slightly (e.g. `0.50`) or change `textPosition` to `"top"` or `"bottom"` so the text sits over a calmer part of the frame.
+- **"The video has bars":** Smart Video Fit uses `contain` over a soft blurred poster/plum fill when the video shape differs from the screen so Mam's face is never cropped. Set `fit: "cover"` in `creditsVideo` if you prefer edge-to-edge cropping.
+- **"No sound in the credits on iPhone":** Make sure the phone's silent/ring switch and volume are up, the player isn't muted, and the clip is encoded as MP4 (H.264 + AAC).
+- **"The names go too fast":** Use a slightly longer clip (35–60s) or shorten the `withLoveFrom` list into concise groups; each screen is locked to at least 2.5s of hold time and extends past the video end if needed so names are never rushed.

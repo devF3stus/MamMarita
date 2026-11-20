@@ -99,7 +99,7 @@
       </div>
 
       <div class="top-bar-actions">
-        <span id="home-audio-status" class="audio-source-pill is-hidden" aria-live="polite">Demo music</span>
+        <span id="home-audio-status" class="audio-source-pill is-hidden" aria-live="polite"></span>
         <button id="btn-home-chapters" type="button" class="top-nav-link">
           Chapters
         </button>
@@ -218,7 +218,7 @@
           <span id="wish-lightbox-name" class="wish-sender-name gold-shimmer">Friend One</span>
           <span class="badge-divider" aria-hidden="true">·</span>
           <span id="wish-lightbox-rel" class="wish-sender-rel">Church Family</span>
-          <span id="wish-lightbox-demo" class="demo-pill is-hidden">DEMO</span>
+          <span id="wish-lightbox-demo" class="demo-pill is-hidden"></span>
         </div>
         <p id="wish-lightbox-msg" class="wish-sender-msg"></p>
       </div>
@@ -293,7 +293,7 @@
       </div>
 
       <!-- Tiny Top-Zone DEMO Tag (never inside bottom captions) -->
-      <span id="top-demo-pill" class="demo-pill demo-pill--top-zone is-hidden">DEMO</span>
+      <span id="top-demo-pill" class="demo-pill demo-pill--top-zone is-hidden"></span>
     </div>
 
     <!-- 3B. Tiny One-Time Tap-to-Hide Hint (Shared for Captions & Letters) -->
@@ -393,7 +393,45 @@
 
     <!-- 8. Step D: End Credits Overlay -->
     <div id="credits-overlay" class="credits-overlay is-hidden" aria-live="polite">
-      <div class="credits-roll-wrap">
+      <!-- Video Background & Decorative Readability Layers (hidden when falling back to plain plum) -->
+      <div id="credits-bg-layer" class="credits-bg-layer is-hidden" aria-hidden="true">
+        <div id="credits-video-stage" class="credits-video-stage"></div>
+        <div id="credits-plum-overlay" class="credits-plum-overlay"></div>
+        <div id="credits-text-gradient" class="credits-text-gradient"></div>
+        <div id="credits-vignette" class="credits-vignette"></div>
+        <div id="credits-grain" class="credits-grain"></div>
+        <div id="credits-ending-scrim" class="credits-ending-scrim"></div>
+      </div>
+
+      <!-- Timed Fading Credit Lines + Final "Happy Birthday, Mam" Finale (when credits video is active) -->
+      <div id="credits-sequence-wrap" class="credits-sequence-wrap is-hidden">
+        <div id="credits-line-stage" class="credits-line-stage">
+          <p id="credits-seq-eyebrow" class="eyebrow-gold is-hidden"></p>
+          <p id="credits-seq-label" class="credit-label is-hidden"></p>
+          <p id="credits-seq-value" class="credit-value"></p>
+        </div>
+
+        <div id="credits-finale-wrap" class="credits-finale-wrap is-hidden">
+          <div class="monogram-ring monogram-ring--small" aria-hidden="true">
+            <span class="monogram-letter gold-shimmer">M</span>
+          </div>
+          <h3 id="credits-finale-blessing" class="credits-blessing gold-shimmer">Happy Birthday, Mam.</h3>
+          <p id="credits-finale-subline" class="credits-subline"></p>
+          <div class="credits-actions">
+            <button id="btn-replay-film-seq" type="button" class="btn btn--primary">
+              Replay Film
+            </button>
+            <button id="btn-credits-letters-seq" type="button" class="btn btn--secondary">
+              Read Letters Again
+            </button>
+            <button id="btn-credits-home-seq" type="button" class="btn btn--ghost">
+              Back to Home
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="credits-fallback-wrap" class="credits-roll-wrap">
         <div class="monogram-ring monogram-ring--small" aria-hidden="true">
           <span class="monogram-letter gold-shimmer">M</span>
         </div>
@@ -410,7 +448,7 @@
           <div class="credit-item">
             <p class="credit-label">
               <span id="credit-love-label">With love from</span>
-              <span id="credit-love-demo" class="demo-pill is-hidden">DEMO</span>
+              <span id="credit-love-demo" class="demo-pill is-hidden"></span>
             </p>
             <p id="credit-love-names" class="credit-value"></p>
           </div>
@@ -418,7 +456,7 @@
           <div class="credit-item">
             <p class="credit-label">
               <span id="credit-director-label">Directed by</span>
-              <span id="credit-director-demo" class="demo-pill is-hidden">DEMO</span>
+              <span id="credit-director-demo" class="demo-pill is-hidden"></span>
             </p>
             <p id="credit-director-name" class="credit-value"></p>
           </div>
@@ -460,7 +498,7 @@
         </div>
 
         <div class="player-top-right">
-          <span id="player-audio-status" class="audio-source-pill is-hidden">Demo music</span>
+          <span id="player-audio-status" class="audio-source-pill is-hidden"></span>
           <button id="btn-skip-letters" type="button" class="player-text-btn">
             Skip to Letters
           </button>
