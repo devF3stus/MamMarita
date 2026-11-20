@@ -1,0 +1,7 @@
+originals/
+raw/
+*.mov
+*.heic
+*.psd
+.DS_Store
+Thumbs.db

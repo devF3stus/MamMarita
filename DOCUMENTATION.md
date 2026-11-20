@@ -170,6 +170,15 @@ Every video in `MAMFLIX`—whether in Chapter 4 (*Ministry Videos*), Chapter 6 (
 - **Ministry Clips:** Place in `assets/videos/ministry/ministry-01.mp4` and list in Chapter 4 with `type: "video"`.
 - **Birthday Wishes:** Place in `assets/videos/wishes/wish-01-name.mp4` and list in `wishes: [ ... ]` in `js/content.js`. Set `featured: true` to play in Chapter 6 (*Voices of Love*) AND show on the 2-column *Wall of Wishes*, or `featured: false` to show on the *Wall of Wishes* only.
 
+### Automatic Compression Helper (`compress-media.py`)
+Before pushing to GitHub, you can run the helper script in the project root:
+```bash
+python compress-media.py
+```
+- **Safe backups:** Every file larger than the target (`> 15 MB` for videos, `> 1 MB` for photos, `> 5–6 MB` for audio) is copied to `./originals/` (excluded from Git in `.gitignore`) before compression.
+- **Same filenames:** Compressed files overwrite the originals in `assets/` with the exact same name and extension, so `js/content.js` never needs editing.
+- **Safe to run twice:** Files already under the target sizes are skipped automatically with zero extra quality loss.
+
 ---
 
 ## 8. Troubleshooting
@@ -201,7 +210,7 @@ Go through this checklist right before you share the link with Mam:
 
 - [ ] **`demoMode: "off"`** is set at the top of `js/content.js`, and **all `DEMO` badges and demo placeholders are gone**.
 - [ ] **Tap `Read more`, `← Prev`, `Next →`, `Skip`, `Close`, and `Replay` on BOTH a real iPhone and a real Android phone** — test during a playing video AND during a letter, including after controls fade and reappear.
-- [ ] **Every video checked on both a real iPhone and a real Android phone** — starts quickly, plays with sound, and fits without cropped heads (`ministry-01.mp4` compressed from 72 MB down to ~8 MB in HandBrake!).
+- [ ] **Every video checked on both a real iPhone and a real Android phone** — starts quickly, plays with sound, and fits without cropped heads.
 - [ ] **No card or caption covers a face** across Chapters 1 to 7 on a real phone.
 - [ ] **All text is clearly readable** on both bright and dark background photos.
 - [ ] **All 9 letters (or your custom list of letters) are proofread and approved by their senders**, with permission for all photos used.
