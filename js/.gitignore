@@ -1,0 +1,14 @@
+# Mac and Windows junk files
+.DS_Store
+Thumbs.db
+
+# Raw, uncompressed originals and work files (keep these on your computer only)
+originals/
+raw/
+*.psd
+*.mov
+*.heic
+
+# Unapproved or backup files
+backup/
+unused/

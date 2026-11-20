@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#130816" />
+  <meta name="description" content="MAMFLIX — The Story of Her. A special birthday documentary edition celebrating Pastor Marita Mbae (Mam)." />
+  <title>MAMFLIX — The Story of Her</title>
+
+  <!-- Google Fonts Fallback (paired with self-hosted @font-face in css/style.css) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ====================================================================
+       AMBIENT BACKGROUND LAYER (CSS-Only Glows & Pauseable Soft Particles)
+       ==================================================================== -->
+  <div id="ambient-layer" class="ambient-layer" aria-hidden="true">
+    <div class="ambient-glow ambient-glow--top"></div>
+    <div class="ambient-glow ambient-glow--bottom"></div>
+    <div id="particles-container" class="particles-container"></div>
+    <div class="ambient-vignette"></div>
+  </div>
+
+  <!-- ====================================================================
+       OPTIONAL STEP 0: LIGHT PASSWORD / INVITATION GATE (Off by default)
+       ==================================================================== -->
+  <section id="screen-password" class="screen screen--center is-hidden" aria-label="Private Screening Access">
+    <div class="gate-card">
+      <div class="monogram-ring" aria-hidden="true">
+        <span class="monogram-letter">M</span>
+      </div>
+      <p class="eyebrow-gold">A MAMFLIX ORIGINAL</p>
+      <h1 id="pw-title" class="gate-title">A Private Family Screening</h1>
+      <p id="pw-subtitle" class="gate-subtitle">Enter the invitation code to join the celebration.</p>
+
+      <form id="password-form" class="password-form" autocomplete="off">
+        <label for="password-input" class="sr-only">Invitation Code</label>
+        <input
+          type="password"
+          id="password-input"
+          class="password-input"
+          placeholder="Invitation code"
+          required
+        />
+        <button type="submit" class="btn btn--gold">Enter Screening</button>
+      </form>
+      <p id="password-error" class="password-error is-hidden" role="alert">
+        That code did not match. Please try again.
+      </p>
+    </div>
+  </section>
+
+  <!-- ====================================================================
+       STEP A: "PRESS TO BEGIN" SCREEN (Unlocks Web Audio / iOS Safari Audio)
+       ==================================================================== -->
+  <section id="screen-gate" class="screen screen--center" aria-label="Welcome Screen">
+    <div class="gate-content">
+      <div class="monogram-ring" aria-hidden="true">
+        <span class="monogram-letter gold-shimmer">M</span>
+      </div>
+
+      <p class="eyebrow-gold">A MAMFLIX ORIGINAL</p>
+      <h1 class="gate-film-title">The Story of Her</h1>
+
+      <div class="sound-note">
+        <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M11 5L6 9H2v6h4l5 4V5zM15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Best experienced with sound</span>
+      </div>
+
+      <button id="btn-begin" type="button" class="btn btn--begin" aria-label="Begin The Story of Her">
+        <span>Begin</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ====================================================================
+       STEP B: HOMEPAGE (Netflix-Inspired Documentary Hero)
+       ==================================================================== -->
+  <main id="screen-home" class="screen screen--home is-hidden" aria-label="Documentary Homepage">
+    <!-- Hero Background Photo / Demo Frame -->
+    <div class="hero-backdrop" aria-hidden="true">
+      <div id="hero-media-frame" class="media-stage hero-media-stage"></div>
+      <div class="hero-gradient-overlay"></div>
+    </div>
+
+    <!-- Top Navigation Bar -->
+    <header class="top-bar">
+      <div class="brand-lockup">
+        <span class="brand-m gold-shimmer">M</span>
+        <span class="brand-wordmark">MAMFLIX</span>
+      </div>
+
+      <div class="top-bar-actions">
+        <span id="home-audio-status" class="audio-source-pill is-hidden" aria-live="polite">Demo music</span>
+        <button id="btn-home-chapters" type="button" class="top-nav-link">
+          Chapters
+        </button>
+        <button id="btn-home-mute" type="button" class="icon-btn" aria-label="Mute or unmute background piano">
+          <svg id="icon-home-unmuted" class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M11 5L6 9H2v6h4l5 4V5zM15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <svg id="icon-home-muted" class="icon-svg is-hidden" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M11 5L6 9H2v6h4l5 4V5zM23 9l-6 6M17 9l6 6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Hero Content Column -->
+    <div class="hero-container">
+      <div class="hero-copy">
+        <div class="hero-badges">
+          <span id="hero-brand-label" class="eyebrow-gold">A MAMFLIX ORIGINAL</span>
+          <span class="badge-divider" aria-hidden="true">·</span>
+          <span id="hero-edition-label" class="eyebrow-blush">A SPECIAL BIRTHDAY EDITION</span>
+        </div>
+
+        <h1 id="hero-title" class="hero-title gold-shimmer">The Story of Her</h1>
+        <p id="hero-honoree" class="hero-honoree">Dedicated to Pastor Marita Mbae · “Mam”</p>
+        <p id="hero-tagline" class="hero-tagline">A beautiful life. A remarkable woman. A song that continues.</p>
+
+        <!-- Metadata Pills -->
+        <ul id="hero-metadata" class="hero-metadata" aria-label="Film details"></ul>
+
+        <!-- Description -->
+        <div class="hero-description-wrap">
+          <p id="hero-description" class="hero-description"></p>
+        </div>
+
+        <!-- Primary Action Buttons -->
+        <div class="hero-actions">
+          <button id="btn-play-film" type="button" class="btn btn--primary">
+            <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+              <polygon points="6,4 20,12 6,20" fill="currentColor" />
+            </svg>
+            <span>Play Film</span>
+          </button>
+
+          <button id="btn-explore-story" type="button" class="btn btn--secondary">
+            <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="3" y="4" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.7"/>
+              <rect x="14" y="4" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.7"/>
+              <rect x="3" y="13" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.7"/>
+              <rect x="14" y="13" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.7"/>
+            </svg>
+            <span>Explore Her Story</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ====================================================================
+       CHAPTER DRAWER / MODAL ("EXPLORE HER STORY" — CHAPTERS & WALL OF WISHES)
+       ==================================================================== -->
+  <aside id="chapter-modal" class="chapter-modal is-hidden" role="dialog" aria-modal="true" aria-labelledby="chapter-modal-title">
+    <div id="chapter-modal-backdrop" class="chapter-modal-backdrop"></div>
+    <div class="chapter-modal-sheet">
+      <div class="chapter-modal-header">
+        <div>
+          <p class="eyebrow-gold">THE DOCUMENTARY CHAPTERS</p>
+          <h2 id="chapter-modal-title" class="chapter-modal-title">Explore Her Story</h2>
+        </div>
+        <button id="btn-close-chapters" type="button" class="icon-btn" aria-label="Close chapter menu">
+          <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M18 6L6 18M6 6l12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Chapter Tiles Grid -->
+      <div id="chapter-tiles-grid" class="chapter-tiles-grid" role="list"></div>
+
+      <!-- Wall of Wishes Section (All Birthday Wish Videos) -->
+      <div id="wall-of-wishes-section" class="wall-of-wishes-section">
+        <div class="wall-of-wishes-header">
+          <div>
+            <p class="eyebrow-gold">VOICES OF LOVE</p>
+            <h3 class="wall-of-wishes-title">Wall of Wishes</h3>
+            <p class="wall-of-wishes-subtitle">Every birthday video message gathered for Mam — tap any card to watch full-screen.</p>
+          </div>
+        </div>
+        <div id="wall-of-wishes-grid" class="wall-of-wishes-grid" role="list"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ====================================================================
+       STANDALONE FULL-SCREEN WISH VIDEO VIEWER (Opened from Wall of Wishes)
+       ==================================================================== -->
+  <aside id="wish-lightbox" class="wish-lightbox is-hidden" role="dialog" aria-modal="true" aria-label="Birthday Wish Video Player">
+    <div id="wish-lightbox-stage" class="wish-lightbox-stage"></div>
+    <div class="stage-cinematic-vignette" aria-hidden="true"></div>
+
+    <!-- Top Close & Counter Bar -->
+    <div class="wish-lightbox-top">
+      <span id="wish-lightbox-counter" class="eyebrow-gold">WISH 1 OF 3</span>
+      <button id="btn-close-wish-lightbox" type="button" class="player-nav-btn" aria-label="Close video and return to Wall of Wishes">
+        <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M18 6L6 18M6 6l12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        <span>Close</span>
+      </button>
+    </div>
+
+    <!-- Bottom Sender Metadata & Prev/Next Controls -->
+    <div class="wish-lightbox-bottom">
+      <div class="wish-meta-card">
+        <div class="wish-meta-header">
+          <span id="wish-lightbox-name" class="wish-sender-name gold-shimmer">Friend One</span>
+          <span class="badge-divider" aria-hidden="true">·</span>
+          <span id="wish-lightbox-rel" class="wish-sender-rel">Church Family</span>
+          <span id="wish-lightbox-demo" class="demo-pill is-hidden">DEMO</span>
+        </div>
+        <p id="wish-lightbox-msg" class="wish-sender-msg"></p>
+      </div>
+
+      <div class="wish-lightbox-controls">
+        <button id="btn-prev-wall-wish" type="button" class="btn btn--letter-nav" aria-label="Previous wish video">
+          ← Previous Wish
+        </button>
+        <button id="btn-next-wall-wish" type="button" class="btn btn--letter-nav" aria-label="Next wish video">
+          Next Wish →
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ====================================================================
+       STEP C & D: UNIFIED CINEMATIC FILM PLAYER
+       Plays Intro, Chapters 1–7 (including Ministry Videos & Voices of Love),
+       Letters, and End Credits in one engine.
+       ==================================================================== -->
+  <section id="screen-player" class="screen screen--player is-hidden" aria-label="Documentary Film Player">
+
+    <!-- 1. Dual Cross-Fade Visual Stage (Ken Burns Photos, Videos, or Demo Frames) -->
+    <div id="player-stage" class="player-stage">
+      <div id="slide-layer-a" class="slide-layer"></div>
+      <div id="slide-layer-b" class="slide-layer"></div>
+      <div class="stage-cinematic-vignette" aria-hidden="true"></div>
+    </div>
+
+    <!-- 2. Opening Intro Card & Chapter Title Cards Overlay (Opaque Plum/Blurred Background, No Photo Behind) -->
+    <div id="title-card-overlay" class="title-card-overlay is-hidden" aria-live="polite">
+      <div class="title-card-inner">
+        <p id="title-card-eyebrow" class="eyebrow-gold">CHAPTER 1</p>
+        <h2 id="title-card-heading" class="title-card-heading gold-shimmer">The Woman</h2>
+        <div class="title-card-rule" aria-hidden="true"></div>
+        <p id="title-card-epigraph" class="title-card-epigraph"></p>
+      </div>
+    </div>
+
+    <!-- 3. TOP ZONE: Slim Compact Status Pills, Timeline Year Pill, Letter Progress & Tiny DEMO Tag -->
+    <div id="top-zone-overlay" class="top-zone-overlay" aria-live="polite">
+      <!-- Slim auto-fading status pill (e.g. "Mam's worship recording" or ministry clip caption) -->
+      <div id="worship-status-card" class="top-status-pill is-hidden">
+        <div class="worship-wave" aria-hidden="true">
+          <span></span><span></span><span></span><span></span>
+        </div>
+        <span id="worship-status-title" class="top-status-pill-text">Mam's worship recording</span>
+        <span id="worship-status-note" class="sr-only"></span>
+      </div>
+
+      <!-- Ministry Video Scene Slim Top Pill -->
+      <div id="video-caption-overlay" class="top-status-pill is-hidden">
+        <div class="worship-wave" aria-hidden="true">
+          <span></span><span></span><span></span><span></span>
+        </div>
+        <span id="video-caption-text" class="top-status-pill-text"></span>
+        <span id="video-caption-demo" class="sr-only"></span>
+      </div>
+
+      <!-- Chapter 5 Timeline Year Top Pill (or bottom zone) -->
+      <div id="timeline-top-pill" class="top-year-pill is-hidden">
+        <span id="timeline-year" class="timeline-year">EARLY FOUNDATIONS</span>
+      </div>
+
+      <!-- Chapter 7 Letters Top Progress Indicator ("3 / 9" + dots + Skip to Credits) -->
+      <div id="letter-top-progress" class="letter-top-progress is-hidden">
+        <span id="letter-counter" class="letter-counter">1 / 9</span>
+        <div id="letter-dots" class="letter-dots" role="tablist" aria-label="Choose a letter"></div>
+        <button id="btn-skip-to-credits" type="button" class="top-pill-action" aria-label="Skip to End Credits">
+          Skip to Credits →
+        </button>
+      </div>
+
+      <!-- Tiny Top-Zone DEMO Tag (never inside bottom captions) -->
+      <span id="top-demo-pill" class="demo-pill demo-pill--top-zone is-hidden">DEMO</span>
+    </div>
+
+    <!-- 3B. Tiny One-Time Tap-to-Hide Hint (Shared for Captions & Letters) -->
+    <div id="letter-tap-hint" class="letter-tap-hint is-hidden" aria-hidden="true">
+      Tap empty photo area to hide or show cards
+    </div>
+
+    <!-- 3C. Chapter 6 "Voices of Love" Wish Video Fancy Compact Card -->
+    <div id="wish-film-overlay" class="wish-film-overlay is-hidden" aria-live="polite">
+      <div class="wish-film-bottom-inner fancy-caption-card card">
+        <div class="wish-meta-header">
+          <span id="wish-film-counter" class="fancy-caption-label">VOICE OF LOVE 1 / 3</span>
+          <span class="badge-divider" aria-hidden="true">·</span>
+          <span id="wish-film-rel" class="fancy-caption-label">Church Family</span>
+          <span id="wish-film-demo" class="sr-only"></span>
+        </div>
+        <h3 id="wish-film-name" class="wish-sender-name gold-shimmer">Friend One</h3>
+        <p id="wish-film-msg" class="wish-sender-msg"></p>
+        <div class="wish-film-actions controls">
+          <button id="btn-prev-film-wish" type="button" class="btn btn--letter-nav" aria-label="Previous wish">
+            ← Prev
+          </button>
+          <button id="btn-next-film-wish" type="button" class="btn btn--letter-nav" aria-label="Next or skip wish">
+            Next Wish →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Chapter 4 Quotes Fancy Compact Card (Hidden — routed through unified Fancy Caption Card) -->
+    <div id="quote-overlay" class="quote-overlay is-hidden" aria-live="polite">
+      <blockquote class="bottom-zone-quote fancy-caption-card card">
+        <cite id="quote-author" class="fancy-caption-label"></cite>
+        <p id="quote-text" class="quote-text"></p>
+        <span id="quote-demo-badge" class="sr-only"></span>
+      </blockquote>
+    </div>
+
+    <!-- 5. Chapter 5 Timeline Fancy Compact Card (Hidden — routed through unified Fancy Caption Card) -->
+    <div id="timeline-overlay" class="timeline-overlay is-hidden" aria-live="polite">
+      <div class="bottom-zone-timeline fancy-caption-card card">
+        <span id="timeline-demo-badge" class="sr-only"></span>
+        <h3 id="timeline-milestone" class="fancy-caption-label"></h3>
+        <p id="timeline-caption" class="timeline-caption"></p>
+        <div id="timeline-steps" class="timeline-steps" aria-hidden="true"></div>
+      </div>
+    </div>
+
+    <!-- 6. Chapter 7 Letters to Mam Stage (Smaller, Clearer Glass Card + Tap-to-Hide + Read More) -->
+    <div id="letters-overlay" class="letters-overlay is-hidden" aria-label="Letters to Mam">
+      <div id="letter-stage-wrap" class="letter-stage-wrap card-pos-bottom">
+        <article id="letter-paper" class="letter-glass-card card" aria-live="polite">
+          <!-- Compact 1-line sender header with optional inline 38px circular sender photo (no monogram if missing) -->
+          <header class="letter-glass-header">
+            <div id="letter-avatar-ring" class="letter-avatar-ring is-hidden">
+              <img id="letter-avatar-img" class="letter-avatar-img" alt="" decoding="async" />
+              <span id="letter-avatar-initials" class="sr-only"></span>
+            </div>
+            <div class="letter-sender-inline">
+              <h3 id="letter-sender" class="letter-sender gold-shimmer">Friend One</h3>
+              <span class="badge-divider" aria-hidden="true">·</span>
+              <p id="letter-role" class="letter-role">Personal Tribute</p>
+            </div>
+            <span id="letter-demo-badge" class="sr-only"></span>
+            <span id="letter-salutation" class="sr-only"></span>
+            <span id="letter-closing" class="sr-only"></span>
+          </header>
+
+          <!-- Message body: shows 3-4 lines by default with soft fade; expands up to 45vh on "Read more" -->
+          <div id="letter-body" class="letter-glass-body"></div>
+
+          <!-- Compact Footer: Prev, Optional Read More toggle, Next -->
+          <footer class="letter-glass-footer controls">
+            <button id="btn-prev-letter" type="button" class="btn btn--letter-nav" aria-label="Previous letter">
+              ← Prev
+            </button>
+            <button id="btn-letter-read-more" type="button" class="letter-read-more-btn is-hidden" aria-label="Read full letter" aria-expanded="false">
+              Read more
+            </button>
+            <button id="btn-next-letter" type="button" class="btn btn--letter-nav" aria-label="Next letter or roll credits">
+              Next →
+            </button>
+          </footer>
+        </article>
+      </div>
+    </div>
+
+    <!-- 7. Unified Fancy Compact Caption Card (Film Captions, Chapter 4 Quotes, Chapter 5 Timeline) -->
+    <div id="subtitle-bar" class="subtitle-bar" aria-live="polite">
+      <div id="subtitle-inner" class="subtitle-inner fancy-caption-card card">
+        <p id="subtitle-label" class="fancy-caption-label is-hidden"></p>
+        <div id="subtitle-lines" class="subtitle-lines"></div>
+        <div id="subtitle-timeline-steps" class="timeline-steps is-hidden" aria-hidden="true"></div>
+        <span id="subtitle-demo-badge" class="sr-only"></span>
+      </div>
+    </div>
+
+    <!-- 8. Step D: End Credits Overlay -->
+    <div id="credits-overlay" class="credits-overlay is-hidden" aria-live="polite">
+      <div class="credits-roll-wrap">
+        <div class="monogram-ring monogram-ring--small" aria-hidden="true">
+          <span class="monogram-letter gold-shimmer">M</span>
+        </div>
+
+        <p class="eyebrow-gold">A MAMFLIX ORIGINAL DOCUMENTARY</p>
+        <h2 class="credits-film-title">The Story of Her</h2>
+
+        <div class="credits-blocks">
+          <div class="credit-item">
+            <p id="credit-lead-label" class="credit-label">Starring</p>
+            <p id="credit-lead-name" class="credit-value">Mam · Pastor Marita Mbae</p>
+          </div>
+
+          <div class="credit-item">
+            <p class="credit-label">
+              <span id="credit-love-label">With love from</span>
+              <span id="credit-love-demo" class="demo-pill is-hidden">DEMO</span>
+            </p>
+            <p id="credit-love-names" class="credit-value"></p>
+          </div>
+
+          <div class="credit-item">
+            <p class="credit-label">
+              <span id="credit-director-label">Directed by</span>
+              <span id="credit-director-demo" class="demo-pill is-hidden">DEMO</span>
+            </p>
+            <p id="credit-director-name" class="credit-value"></p>
+          </div>
+        </div>
+
+        <div class="credits-divider" aria-hidden="true"></div>
+
+        <h3 id="credits-blessing" class="credits-blessing gold-shimmer">Happy Birthday, Mam.</h3>
+        <p id="credits-subline" class="credits-subline"></p>
+
+        <div class="credits-actions">
+          <button id="btn-replay-film" type="button" class="btn btn--primary">
+            Replay Film
+          </button>
+          <button id="btn-credits-letters" type="button" class="btn btn--secondary">
+            Read Letters Again
+          </button>
+          <button id="btn-credits-home" type="button" class="btn btn--ghost">
+            Back to Home
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 9. Auto-Hiding Player Controls Chrome -->
+    <div id="player-chrome" class="player-chrome">
+      <!-- Top Bar Inside Player -->
+      <div class="player-top-bar">
+        <button id="btn-player-home" type="button" class="player-nav-btn" aria-label="Return to Homepage">
+          <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>Home</span>
+        </button>
+
+        <div class="player-now-playing">
+          <span id="player-chapter-badge" class="player-chapter-badge">CHAPTER 1</span>
+          <span id="player-chapter-title" class="player-chapter-title">The Woman</span>
+        </div>
+
+        <div class="player-top-right">
+          <span id="player-audio-status" class="audio-source-pill is-hidden">Demo music</span>
+          <button id="btn-skip-letters" type="button" class="player-text-btn">
+            Skip to Letters
+          </button>
+          <button id="btn-player-chapters" type="button" class="player-text-btn" aria-label="Open chapter menu">
+            Chapters
+          </button>
+        </div>
+      </div>
+
+      <!-- Bottom Control Bar Inside Player -->
+      <div class="player-bottom-bar">
+        <!-- Slim Gold Documentary Progress Bar -->
+        <div id="progress-track" class="progress-track" role="progressbar" aria-label="Documentary progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div id="progress-chapter-markers" class="progress-chapter-markers" aria-hidden="true"></div>
+          <div id="progress-fill" class="progress-fill"></div>
+        </div>
+
+        <div class="player-controls-row">
+          <div class="player-controls-left">
+            <!-- Prev Chapter -->
+            <button id="btn-prev-chapter" type="button" class="icon-btn" aria-label="Previous chapter">
+              <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+                <polygon points="19,20 9,12 19,4" fill="currentColor"/>
+                <line x1="5" y1="5" x2="5" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </button>
+
+            <!-- Play / Pause -->
+            <button id="btn-play-pause" type="button" class="icon-btn icon-btn--large" aria-label="Pause or resume film">
+              <svg id="icon-pause" class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="6" y="4" width="4" height="16" rx="1" fill="currentColor"/>
+                <rect x="14" y="4" width="4" height="16" rx="1" fill="currentColor"/>
+              </svg>
+              <svg id="icon-play" class="icon-svg is-hidden" viewBox="0 0 24 24" aria-hidden="true">
+                <polygon points="6,4 20,12 6,20" fill="currentColor"/>
+              </svg>
+            </button>
+
+            <!-- Next Chapter -->
+            <button id="btn-next-chapter" type="button" class="icon-btn" aria-label="Next chapter">
+              <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+                <polygon points="5,4 15,12 5,20" fill="currentColor"/>
+                <line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </button>
+
+            <!-- Mute / Unmute -->
+            <button id="btn-player-mute" type="button" class="icon-btn" aria-label="Mute or unmute audio">
+              <svg id="icon-player-unmuted" class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M11 5L6 9H2v6h4l5 4V5zM15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <svg id="icon-player-muted" class="icon-svg is-hidden" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M11 5L6 9H2v6h4l5 4V5zM23 9l-6 6M17 9l6 6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+
+            <span id="player-time-readout" class="player-time-readout">Chapter 1 of 7</span>
+          </div>
+
+          <div class="player-controls-right">
+            <span id="paused-indicator" class="paused-indicator is-hidden">PAUSED</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- Content Configuration & Film Engine Scripts -->
+  <script src="js/content.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
